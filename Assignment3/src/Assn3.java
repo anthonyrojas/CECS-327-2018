@@ -1,18 +1,21 @@
 import java.util.*;
 import java.io.*;
-import java.util.regex.Pattern;
-import java.util.regex.Matcher;
-
-import org.apache.commons.net.*;
 import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTP;
 import org.apache.commons.net.ftp.FTPFile;
-import org.apache.commons.net.io.*;
-import org.apache.commons.net.util.*;
+
+/**
+ * @author Anthony Rojas, 011819338
+ * Assignment 3 - FTP Client
+ * This is an FTP client built in Java using the Apache commons net 3.6 library
+ * To run this, make sure to include the library into the path of the project
+ * Compile program: javac -cp "commons-net-3.6.jar" Assn3.java
+ * Run program: java -cp ".;commons-net-3.6.jar" Assn3 "54.183.205.102" "cecs327:cecs327" [ftp commands | optional]
+ */
 public class Assn3 {
     public static String FTP_PROMPT = "ftp> ";
     public static void main(String[] args){
-        if(args.length <= 0){
+        if(args.length < 2){
             System.out.println("You must enter the IP address and username:password " +
                     "\nRun the program again");
             System.exit(1);
@@ -28,39 +31,44 @@ public class Assn3 {
         String[] userInfo = idPwd.split(":");
         String user = userInfo[0];
         String password = userInfo[1];
-        connectToServer(IP, user, password);
+        FTPClient ftp = connectToServer(IP, user, password);
+        if(args.length > 2){
+            String[] userInputs = Arrays.copyOfRange(args, 2, args.length);
+            for(String u : userInputs){
+                parseCommands(ftp, u);
+            }
+            disconnectFTP(ftp);
+        }else{
+            disconnectFTP(ftp);
+        }
     }
 
-    public static void connectToServer(String IP, String user, String password){
+    public static FTPClient connectToServer(String IP, String user, String password){
         FTPClient ftp = new FTPClient();
         try {
             System.out.println("Connecting to the server as " + user + ":" + password);
             ftp.connect(IP);
             ftp.login(user, password);
             System.out.println(ftp.getReplyString());
-            displayMenu();
-            inputMenuOption(ftp);
+            //displayMenu();
+            //inputMenuOption(ftp);
         } catch (Exception e) {
             e.printStackTrace();
         }
+        return ftp;
     }
 
-    public static void inputMenuOption(FTPClient ftp){
-        Scanner ftpCommandIn = new Scanner(System.in);
-        while(true){
-            String ftpInput;
-            System.out.print(FTP_PROMPT);
-            ftpInput = ftpCommandIn.nextLine();
-            String ftpCommand="";
-            String names="";
-            if(!ftpInput.contains(" ")){
-                ftpCommand = ftpInput;
-            }else{
-                ftpCommand = ftpInput.substring(0, ftpInput.indexOf(" "));
-                names = ftpInput.substring(ftpInput.indexOf(" ")+1);
-            }
-            /*String[] ftpInputs = ftpInput.split("\\s");
-            String ftpCommand = ftpInputs[0];*/
+    public static void parseCommands(FTPClient ftp, String ftpInput){
+        String ftpCommand="";
+        String names="";
+        if(!ftpInput.contains(" ")){
+            ftpCommand = ftpInput;
+        }else{
+            ftpCommand = ftpInput.substring(0, ftpInput.indexOf(" "));
+            names = ftpInput.substring(ftpInput.indexOf(" ")+1);
+        }
+        if(!ftpCommand.isEmpty()){
+            System.out.println(FTP_PROMPT + ftpInput);
             switch (ftpCommand){
                 case "ls": displayLocalFiles(ftp);
                     break;
@@ -74,12 +82,59 @@ public class Assn3 {
                     deleteFile(ftp, names);
                     break;
                 case "get":
-                    getDirectory(ftp, names);
+                    getCommand(ftp, names);
+                    break;
+                case "put":
+                    putCommand(ftp, names);
+                    break;
+                case "rmdir":
+                    deleteDirectory(ftp, names);
+                    break;
+                case "quit":
+                    disconnectFTP(ftp);
+                    break;
+                default: System.out.println("Invalid option.");
+                    break;
+            }
+        }
+    }
+
+    //in the event that someone would like to allow user input for ftp commands
+    /*public static void inputMenuOption(FTPClient ftp){
+        Scanner ftpCommandIn = new Scanner(System.in);
+        while(true){
+            String ftpInput;
+            System.out.print(FTP_PROMPT);
+            ftpInput = ftpCommandIn.nextLine();
+            String ftpCommand="";
+            String names="";
+            if(!ftpInput.contains(" ")){
+                ftpCommand = ftpInput;
+            }else{
+                ftpCommand = ftpInput.substring(0, ftpInput.indexOf(" "));
+                names = ftpInput.substring(ftpInput.indexOf(" ")+1);
+            }
+            switch (ftpCommand){
+                case "ls": displayLocalFiles(ftp);
+                    break;
+                case "mkdir":
+                    makeDirectory(ftp, names);
+                    break;
+                case "cd":
+                    changeDirectory(ftp, names);
+                    break;
+                case "delete":
+                    deleteFile(ftp, names);
+                    break;
+                case "get":
+                    getCommand(ftp, names);
+                    //getDirectory(ftp, names);
                     //getFile(ftp, names);
                     break;
                 case "put":
+                    putCommand(ftp, names);
                     //putFile(ftp, names);
-                    putDirectory(ftp, names);
+                    //putDirectory(ftp, names);
                     break;
                 case "rmdir":
                     deleteDirectory(ftp, names);
@@ -95,7 +150,7 @@ public class Assn3 {
                     break;
             }
         }
-    }
+    }*/
 
     public static void displayLocalFiles(FTPClient ftp){
         try {
@@ -132,6 +187,7 @@ public class Assn3 {
             String dirName = ftpNames;
             try{
                 ftp.makeDirectory(dirName);
+                System.out.println(" " + ftp.getReplyString());
             }catch(IOException e){
                 System.out.println(e.getMessage());
             }
@@ -166,11 +222,11 @@ public class Assn3 {
             String fileName = ftpNames;
             try{
                 if(ftp.deleteFile(fileName)){
-                    System.out.println("File deleted");
+                    System.out.println(" " + ftp.getReplyString());
                     return;
                 }
                 else{
-                    System.out.println("File not found");
+                    System.out.println(" " + ftp.getReplyString());
                     return;
                 }
             }catch(IOException e){
@@ -191,7 +247,7 @@ public class Assn3 {
                     if(f.getName().equals(dirName)){
                         if(ftp.removeDirectory(f.getName())){
                             //when directory is empty
-                            System.out.println("Directory deleted.");
+                            System.out.println(" " + ftp.getReplyString());
                         }else{
                             //when the directory is not empty
                             deleteDirectoryContents(ftp, f, "");
@@ -228,112 +284,36 @@ public class Assn3 {
         }
     }
 
-    public static void getFile(FTPClient ftp, String ftpNames){
+    public static void getCommand(FTPClient ftp, String ftpNames){
         if(ftpNames.isEmpty() || ftpNames == null){
-            System.out.println("File name not specified");
+            System.out.println("File or directory name not specified");
             return;
         }else{
             try{
-                File f = new File(ftpNames);
-                FileOutputStream fop = new FileOutputStream(f);
-                ftp.retrieveFile(ftpNames, fop);
-                fop.close();
-            }catch(IOException e ){
+                FTPFile[] files = ftp.listFiles();
+                for(FTPFile f : files){
+                    if(f.getName().equals(ftpNames)){
+                        if(f.isDirectory()){
+                            getDirectory(ftp, ftpNames);
+                        }else{
+                            getFile(ftp, ftpNames);
+                        }
+                    }
+                }
+            }catch(IOException e){
                 System.out.println(e.getMessage());
             }
         }
     }
 
-    public static void putFile(FTPClient ftp, String ftpNames){
-        if(ftpNames.isEmpty() || ftpNames == null){
-            System.out.println("File name not specified");
-        }else{
+    public static void getFile(FTPClient ftp, String ftpNames){
+        try{
             File f = new File(ftpNames);
-            if(f.exists()){
-                try{
-                    FileInputStream fileIn = new FileInputStream(f);
-                    if(ftp.storeFile(ftpNames, fileIn)){
-                        fileIn.close();
-                        System.out.println("File uploaded");
-                        return;
-                    }else{
-                        fileIn.close();
-                        System.out.println("File upload failed.");
-                        return;
-                    }
-                }catch (IOException e){
-                    System.out.println(e.getMessage());
-                    return;
-                }
-            }
-            System.out.println("File does not exist locally");
-            return;
-        }
-    }
-
-    public static void putDirectory(FTPClient ftp, String ftpNames){
-        try{
-            File localCurrentDir = new File(".");
-            File[] localDirFiles = localCurrentDir.listFiles();
-            for(File f : localDirFiles){
-                if(f.getName().equals(ftpNames)){
-                    ftp.makeDirectory(f.getName());
-                    putDirectoryContents(ftp, f, "" + f.getName());
-                    System.out.println(ftp.getReplyString());
-                }
-            }
-        }catch(IOException e){
-            System.out.println(e.getMessage());
-        }
-        catch(Exception e2){
-            System.out.println(e2.getMessage());
-        }
-    }
-
-    public static void putDirectoryContents(FTPClient ftp, File currentDir, String pathStr){
-        for(File f: currentDir.listFiles()){
-            if(f.isDirectory()){
-                try {
-                    ftp.makeDirectory(pathStr + "/" + f.getName());
-                    //ftp.makeDirectory(pathStr + "/" + currentDir.getName() + "/" + f.getName());
-                }catch(IOException e){
-                    System.out.println(e.getMessage());
-                }
-                putDirectoryContents(ftp, f, pathStr + "/" + f.getName());
-                //putDirectoryContents(ftp, f, pathStr + "/" + currentDir.getName() + "/" + f.getName());
-            }else{
-                try{
-                    FileInputStream fIn = new FileInputStream(f);
-                    ftp.storeFile(pathStr + "/" + f.getName(), fIn);
-                    fIn.close();
-                }catch(IOException e){
-                    System.out.println(e.getMessage());
-                }
-            }
-        }
-    }
-
-    public static void determineFileType(FTPClient ftp, String ftpCommand, String ftpNames){
-        try{
-            FTPFile[] files = ftp.listFiles();
-            for(FTPFile f : files){
-                if(f.getName().equals(ftpNames)){
-                    if(f.isFile()){
-                        switch(ftpCommand){
-                            case "put":
-
-                                break;
-                            case "get":
-                                getFile(ftp, ftpNames);
-                                break;
-                                default:
-                                    break;
-                        }
-                    }else if(f.isDirectory()){
-                    }
-                }
-            }
-        }catch(IOException e){
+            FileOutputStream fop = new FileOutputStream(f);
+            ftp.retrieveFile(ftpNames, fop);
+            fop.close();
+            System.out.println(" " + ftp.getReplyString());
+        }catch(IOException e ){
             System.out.println(e.getMessage());
         }
     }
@@ -374,7 +354,90 @@ public class Assn3 {
             System.out.println(e.getMessage());
         }
     }
-    public static void displayMenu(){
+
+    public static void putCommand(FTPClient ftp, String ftpNames){
+        if(ftpNames.isEmpty() || ftpNames == null){
+            System.out.println("File name or directory name not specified");
+        }else{
+            File ftpUploadFile = new File(ftpNames);
+            if(ftpUploadFile.exists()){
+                if(ftpUploadFile.isFile()){
+                    putFile(ftp, ftpNames);
+                }else{
+                    putDirectory(ftp, ftpNames);
+                }
+            }else{
+                System.out.println("File or directory does not exist locally.");
+            }
+        }
+    }
+
+    public static void putFile(FTPClient ftp, String ftpNames){
+        File f = new File(ftpNames);
+        if(f.exists()){
+            try{
+                FileInputStream fileIn = new FileInputStream(f);
+                if(ftp.storeFile(ftpNames, fileIn)){
+                    fileIn.close();
+                    System.out.println(" " + ftp.getReplyString());
+                    return;
+                }else{
+                    fileIn.close();
+                    System.out.println(" " + ftp.getReplyString());
+                    return;
+                }
+            }catch (IOException e){
+                System.out.println(e.getMessage());
+                return;
+            }
+        }
+        return;
+    }
+
+    public static void putDirectory(FTPClient ftp, String ftpNames){
+        try{
+            File localCurrentDir = new File(".");
+            File[] localDirFiles = localCurrentDir.listFiles();
+            for(File f : localDirFiles){
+                if(f.getName().equals(ftpNames)){
+                    ftp.makeDirectory(f.getName());
+                    putDirectoryContents(ftp, f, "" + f.getName());
+                    System.out.println(" " + ftp.getReplyString());
+                }
+            }
+        }catch(IOException e){
+            System.out.println(e.getMessage());
+        }
+        catch(Exception e2){
+            System.out.println(e2.getMessage());
+        }
+    }
+
+    public static void putDirectoryContents(FTPClient ftp, File currentDir, String pathStr){
+        for(File f: currentDir.listFiles()){
+            if(f.isDirectory()){
+                try {
+                    ftp.makeDirectory(pathStr + "/" + f.getName());
+                    //ftp.makeDirectory(pathStr + "/" + currentDir.getName() + "/" + f.getName());
+                }catch(IOException e){
+                    System.out.println(e.getMessage());
+                }
+                putDirectoryContents(ftp, f, pathStr + "/" + f.getName());
+                //putDirectoryContents(ftp, f, pathStr + "/" + currentDir.getName() + "/" + f.getName());
+            }else{
+                try{
+                    FileInputStream fIn = new FileInputStream(f);
+                    ftp.storeFile(pathStr + "/" + f.getName(), fIn);
+                    fIn.close();
+                }catch(IOException e){
+                    System.out.println(e.getMessage());
+                }
+            }
+        }
+    }
+
+    //in the event of user inputs during program runtime, help menu
+    /*public static void displayMenu(){
         String options = " ls" +
                 "\n cd <directory name>" +
                 "\n cd .." +
@@ -387,12 +450,12 @@ public class Assn3 {
                 "\n --help : will display this menu" +
                 "\n quit : exit the program";
         System.out.println("Available functions are:\n" + options);
-    }
+    }*/
 
     public static void disconnectFTP(FTPClient ftp){
         try {
             ftp.disconnect();
-            System.out.println("goodbye");
+            System.out.println("\ndisconnected from server ...goodbye");
             System.exit(0);
         } catch (IOException e) {
             System.out.println(e.getMessage());

@@ -2,15 +2,17 @@ import java.net.*;
 import java.io.*;
 public class Assn5Client {
     public static void main(String args[]){
+        //args[0] = DNS or IP of the targeted server
+        //args[1] = the message being passed
         Socket s = null;
         try{
             int serverPort = 7896;
-            s = new Socket(args[1], serverPort);
+            s = new Socket(args[0], serverPort);
             DataInputStream in = new DataInputStream(s.getInputStream());
             DataOutputStream out = new DataOutputStream(s.getOutputStream());
-            out.writeUTF(args[0]);
+            out.writeUTF(args[1]);
             String data = in.readUTF();
-            System.out.println("Received:" + data);
+            System.out.println("Server Reply: " + data);
         }catch(UnknownHostException e){
             System.out.println("Sock:" + e.getMessage());
         }catch(EOFException e){

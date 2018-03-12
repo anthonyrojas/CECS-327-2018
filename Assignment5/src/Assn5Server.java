@@ -33,7 +33,8 @@ class Connection extends Thread{
     public void run(){
         try{
             String data = in.readUTF();
-            out.writeUTF(data);
+            String reverseData = new StringBuilder(data).reverse().toString();
+            out.writeUTF(reverseData);
         }catch(EOFException e) {
             System.out.println("EOF:" + e.getMessage());
         }catch(IOException e){
@@ -43,7 +44,7 @@ class Connection extends Thread{
                 clientSocket.close();
             }catch(IOException e){
                 //close failed
-                System.out.println("Closing connection:" + e.getMessage());
+                System.out.println("Closing connection" + e.getMessage());
             }
         }
     }

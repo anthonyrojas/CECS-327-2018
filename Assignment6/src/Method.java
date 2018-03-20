@@ -9,19 +9,19 @@ public class Method extends UnicastRemoteObject implements MethodInterface {
     public Method() throws RemoteException{
     }
 
-    public long fibonacci(long n){
-        long sum = fibonacciHelper(n);
+    public int fibonacci(int n){
+        int sum = fibonacciHelper(n);
         return sum;
     }
-    public long factorial(long n){
-        long fact = n;
-        for(long i=n-1; i > 0; i--){
+    public int factorial(int n){
+        int fact = n;
+        for(int i=n-1; i > 0; i--){
             fact = fact * i;
         }
         return fact;
     }
 
-    public long fibonacciHelper(long n){
+    public int fibonacciHelper(int n){
         if(n<=1){
             return 1;
         }

@@ -13,9 +13,9 @@ public class Assn6Client {
         }else{
             String rmiLocation = args[0];
             String method = args[1];
-            long number = 0;
+            int number = 0;
             try{
-                number = Long.parseLong(args[2]);
+                number = Integer.parseInt(args[2]);
             }catch(Exception numE){
                 System.out.println("Client error: invalid number");
                 System.exit(1);
@@ -31,7 +31,6 @@ public class Assn6Client {
                 }else{
                     m = (MethodInterface) LocateRegistry.getRegistry().lookup(rmiLocation);
                 }
-                m = (MethodInterface) Naming.lookup(rmiLocation);
                 if(method.equalsIgnoreCase("fibonacci")){
                     long result = m.fibonacci(number);
                     System.out.println("Fibonacci of " + number + " is: " + result);

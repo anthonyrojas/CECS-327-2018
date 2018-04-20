@@ -4,13 +4,15 @@ import java.util.*;
 public class PastryServer {
     private static Map<Integer, String> leafSet;
     private static Map<Integer, String> routingTable;
+    private final static int MY_PASTRY = 1201;
+    private final static String MY_IP = "54.183.205.102";
     public static void main(String [] args){
         leafSet = new TreeMap<>();
         leafSet.put(1131, "52.10.42.73");
         leafSet.put(1200, "18.188.49.131");
         leafSet.put(1220, "52.53.151.57");
         leafSet.put(1300, "18.219.11.198");
-        routingTable = new HashMap<>();
+        routingTable = new TreeMap<>();
         routingTable.put(0001, "54.67.23.56");
         routingTable.put(1201, "54.183.205.102");
         routingTable.put(2020, "18.219.20.177");
@@ -31,6 +33,9 @@ public class PastryServer {
             while (true){
                 DatagramPacket request = new DatagramPacket(buffer, buffer.length);
                 aSocket.receive(request);
+                String nodeStr = new String(request.getData());
+                nodeStr = nodeStr.replace(" ", "");
+                String pastry = getPastry(nodeStr);
                 DatagramPacket reply = new DatagramPacket(request.getData(), request.getLength(), request.getAddress(), request.getPort());
                 aSocket.send(reply);
             }
@@ -44,7 +49,43 @@ public class PastryServer {
             }
         }
     }
+    public static String getPastry(String nodeStr){
+        String reply = "NULL";
+        switch (nodeStr.length()){
+            case 0: reply = "NULL";
+                break;
+            case 1:
+                reply = getPastryReply(nodeStr, 1);
+                break;
+            case 2:
+                reply = getPastryReply(nodeStr, 2);
+                break;
+            case 3:
+                reply = getPastryReply(nodeStr, 3);
+                break;
+            case 4:
+                reply = getPastryReply(nodeStr, 4);
+                break;
+            default: reply = "NULL";
+        }
+        return reply;
+    }
 
-    public static void findNearestNode(){
+    public static String getPastryReply(String nodeStr, int length){
+        if(String.valueOf(MY_IP).startsWith(nodeStr)){
+            return String.valueOf(MY_IP) + ":" + MY_IP ;
+        }else{
+            for(int k : leafSet.keySet()){
+                if(String.valueOf(k).startsWith(nodeStr)){
+                    return String.valueOf(k) + ":" + leafSet.get(k);
+                }
+            }
+            for(int k : routingTable.keySet()){
+                if(String.valueOf(k).startsWith(nodeStr)){
+                    return String.valueOf(k) + ":" + routingTable.get(k);
+                }
+            }
+        }
+        return "NULL";
     }
 }

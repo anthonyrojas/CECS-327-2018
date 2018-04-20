@@ -36,7 +36,7 @@ public class PastryServer {
                 String nodeStr = new String(request.getData());
                 nodeStr = nodeStr.replace(" ", "");
                 String pastry = getPastry(nodeStr);
-                DatagramPacket reply = new DatagramPacket(pastry.getBytes(), request.getLength(), request.getAddress(), request.getPort());
+                DatagramPacket reply = new DatagramPacket(pastry.getBytes(), pastry.getBytes().length, request.getAddress(), request.getPort());
                 aSocket.send(reply);
             }
         }catch(SocketException e){

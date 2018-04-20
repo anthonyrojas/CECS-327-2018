@@ -67,7 +67,7 @@ public class PastryServer {
             case 4:
                 reply = getPastryReply(nodeStr, 4);
                 break;
-            default: reply = "NULL";
+            default: reply = "INVALID_REQUEST";
         }
 
         return reply;

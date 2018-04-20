@@ -19,7 +19,7 @@ public class PastryClient {
                 DatagramPacket reply = new DatagramPacket(buffer, buffer.length);
                 //DatagramPacket reply = new DatagramPacket(args[0].getBytes(), args[0].getBytes().length);
                 aSocket.receive(reply);
-                System.out.println("\t" + new String(reply.getData()));
+                System.out.println(" " + args[0] + " - " + new String(reply.getData()));
             }catch(SocketException e){
                 System.out.println("Socket: " + e.getMessage());
             }catch (IOException e){

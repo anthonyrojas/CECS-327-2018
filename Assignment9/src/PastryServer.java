@@ -29,12 +29,13 @@ public class PastryServer {
         DatagramSocket aSocket = null;
         try{
             aSocket = new DatagramSocket(32710);
-            byte[] buffer = new byte[1000];
             while (true){
+                byte[] buffer = new byte[1000];
                 DatagramPacket request = new DatagramPacket(buffer, buffer.length);
                 aSocket.receive(request);
                 String nodeStr = new String(request.getData());
                 nodeStr = nodeStr.replace(" ", "");
+                nodeStr = nodeStr.trim();
                 String pastry = getPastry(nodeStr);
                 DatagramPacket reply = new DatagramPacket(pastry.getBytes(), pastry.getBytes().length, request.getAddress(), request.getPort());
                 aSocket.send(reply);
@@ -68,6 +69,7 @@ public class PastryServer {
                 break;
             default: reply = "NULL";
         }
+
         return reply;
     }
 
@@ -82,7 +84,7 @@ public class PastryServer {
             }
             for(String k : routingTable.keySet()){
                 if(k.startsWith(nodeStr)){
-                    return k + ":" + routingTable.get(k);
+                    return k  + ":" + routingTable.get(k);
                 }
             }
         }

@@ -51,6 +51,11 @@ public class PastryServer {
         }
     }
     public static String getPastry(String nodeStr){
+        try{
+            Integer.parseInt(nodeStr);
+        }catch (Exception e){
+            return "INVALID_REQUEST";
+        }
         String reply;
         switch (nodeStr.length()){
             case 0: reply = "NULL";

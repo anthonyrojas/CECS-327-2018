@@ -10,7 +10,7 @@ public class PastryClient {
             int serverPort = 32710;
             DatagramPacket request = new DatagramPacket(m, m.length, aHost, serverPort);
             aSocket.send(request);
-            byte [] buffer = new byte[1000];
+            byte [] buffer = new byte[100];
             DatagramPacket reply = new DatagramPacket(buffer, buffer.length);
             aSocket.receive(reply);
             System.out.println("Reply: " + new String(reply.getData()));

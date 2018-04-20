@@ -27,7 +27,7 @@ public class PastryServer {
         DatagramSocket aSocket = null;
         try{
             aSocket = new DatagramSocket(32710);
-            byte[] buffer = new byte[1000];
+            byte[] buffer = new byte[100];
             while (true){
                 DatagramPacket request = new DatagramPacket(buffer, buffer.length);
                 aSocket.receive(request);

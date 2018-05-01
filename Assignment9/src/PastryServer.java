@@ -64,7 +64,7 @@ public class PastryServer {
         }else if(nodeStr.length() > 4){
             return "INVALID_REQUEST";
         }else{
-            return getPastry(nodeStr);
+            return getPastryReply(nodeStr, nodeStr.length());
         }
 /*        switch (nodeStr.length()){
             case 0: reply = "NULL";

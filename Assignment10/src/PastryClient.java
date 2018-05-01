@@ -5,8 +5,8 @@ import java.net.*;
 public class PastryClient {
     public static final String AWS_INITIAL_IP = "54.183.205.102";
     public static final int SERVER_PORT = 32710;
-    //timeout time will be 1.5 seconds
-    public static final int MAX_TIME = 500;
+    //timeout time will be 1 seconds
+    public static final int MAX_TIME = 1000;
     public static void main(String [] args){
         //String serverReply = getServerReply(randStr, AWS_INITIAL_IP);
         //System.out.println(serverReply);

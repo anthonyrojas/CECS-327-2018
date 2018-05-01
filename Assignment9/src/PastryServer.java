@@ -66,25 +66,6 @@ public class PastryServer {
         }else{
             return getPastryReply(nodeStr, nodeStr.length());
         }
-/*        switch (nodeStr.length()){
-            case 0: reply = "NULL";
-                break;
-            case 1:
-                reply = getPastryReply(nodeStr, 1);
-                break;
-            case 2:
-                reply = getPastryReply(nodeStr, 2);
-                break;
-            case 3:
-                reply = getPastryReply(nodeStr, 3);
-                break;
-            case 4:
-                reply = getPastryReply(nodeStr, 4);
-                break;
-            default: reply = "INVALID_REQUEST";
-        }
-
-        return reply;*/
     }
 
     public static String getPastryReply(String nodeStr, int length){

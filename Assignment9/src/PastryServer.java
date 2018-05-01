@@ -1,6 +1,8 @@
 import java.net.*;
 import java.io.*;
 import java.util.*;
+
+import jdk.nashorn.internal.ir.ReturnNode;
 public class PastryServer {
     private static Map<String, String> leafSet;
     private static Map<String, String> routingTable;
@@ -82,17 +84,33 @@ public class PastryServer {
         if(String.valueOf(MY_PASTRY).startsWith(nodeStr)){
             return String.valueOf(MY_PASTRY) + ":" + MY_IP ;
         }else{
+            boolean found = false;
             for(String k : leafSet.keySet()){
                 if(k.startsWith(nodeStr)){
+                    found = true;
                     return k + ":" + leafSet.get(k);
                 }
             }
-            for(String k : routingTable.keySet()){
-                if(k.startsWith(nodeStr)){
-                    return k  + ":" + routingTable.get(k);
-                }
+            if(!found){
+                return findInRoutingTable(nodeStr);
             }
         }
         return "NULL";
+    }
+
+    public static String findInRoutingTable(String pastryStr){
+        boolean foundPastry = false;
+        for(String k : routingTable.keySet()){
+            if(k.startsWith(pastryStr)){
+                foundPastry = true;
+                return k + ":" + routingTable.get(k);
+            }
+        }
+        if(foundPastry != true && pastryStr.length()==1){
+            return "NULL";
+        }else{
+            pastryStr = pastryStr.substring(0, pastryStr.length());
+            return findInRoutingTable(pastryStr);
+        }
     }
 }

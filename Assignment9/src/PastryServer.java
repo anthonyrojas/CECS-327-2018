@@ -113,7 +113,7 @@ public class PastryServer {
                     return k + ":" + routingTable.get(k);
                 }
             }
-            pastryStr = pastryStr.substring(0, pastryStr.length());
+            pastryStr = pastryStr.substring(0, pastryStr.length()-1);
         }
         return "NULL";
     }

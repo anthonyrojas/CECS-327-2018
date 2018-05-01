@@ -100,17 +100,20 @@ public class PastryServer {
 
     public static String findInRoutingTable(String pastryStr){
         boolean foundPastry = false;
+        String response = "";
         for(String k : routingTable.keySet()){
             if(k.startsWith(pastryStr)){
                 foundPastry = true;
-                return k + ":" + routingTable.get(k);
+                response = k + ":" + routingTable.get(k);
             }
         }
         if(foundPastry != true && pastryStr.length()==1){
             return "NULL";
-        }else{
+        }else if(foundPastry != true){
             pastryStr = pastryStr.substring(0, pastryStr.length());
             return findInRoutingTable(pastryStr);
+        }else{
+            return response;
         }
     }
 }

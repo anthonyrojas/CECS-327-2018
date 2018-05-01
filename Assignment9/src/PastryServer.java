@@ -99,8 +99,21 @@ public class PastryServer {
                 }
             }
             if(!found){
-                return findInRoutingTable(nodeStr);
+                return locateInRoutingTable(nodeStr);
             }
+        }
+        return "NULL";
+    }
+
+    public static String locateInRoutingTable(String pastryStr){
+        boolean found = false;
+        while(pastryStr.length() > 0){
+            for(String k : routingTable.keySet()){
+                if(k.startsWith(pastryStr)){
+                    return k + ":" + routingTable.get(k);
+                }
+            }
+            pastryStr = pastryStr.substring(0, pastryStr.length());
         }
         return "NULL";
     }

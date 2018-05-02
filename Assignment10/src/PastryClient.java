@@ -1,15 +1,12 @@
 import java.io.*;
-import java.lang.reflect.Array;
 import java.util.*;
 import java.net.*;
 public class PastryClient {
     public static final String AWS_INITIAL_IP = "54.183.205.102";
     public static final int SERVER_PORT = 32710;
-    //timeout time will be 1 seconds
-    public static final int MAX_TIME = 1000;
+    public static final int MAX_TIME = 1500;
+    public static final int MAX_HOPS = 16;//max number of hops is size of the routing table
     public static void main(String [] args){
-        //String serverReply = getServerReply(randStr, AWS_INITIAL_IP);
-        //System.out.println(serverReply);
         ArrayList<Integer> hops = new ArrayList<Integer>();
         Map<Integer, Integer> histogram = initHistogram();
         for(int i=0; i < 1000; i++){
@@ -17,7 +14,6 @@ public class PastryClient {
             boolean found = false;
             String randStr = generateRandomPastry();
             String ip = AWS_INITIAL_IP;
-            //System.out.println(randStr);
             while(found == false){
                 hopCount++;
                 String reply = getServerReply(randStr, ip);
@@ -35,9 +31,12 @@ public class PastryClient {
                 }else if(reply.contains(randStr)){
                     found = true;
                     hops.add(hopCount);
+                }else if(hopCount >= MAX_HOPS){
+                    found = true;
+                    //exclude from data
                 }else{
                     found = true;
-                    //discard this run
+                    hops.add(hopCount);
                 }
             }
         }
@@ -52,7 +51,7 @@ public class PastryClient {
 
     public static Map initHistogram(){
         Map<Integer, Integer> histogram = new HashMap<Integer, Integer>();
-        for(int i=1; i <= 10; i++){
+        for(int i=1; i <= MAX_HOPS; i++){
             histogram.put(i, 0);
         }
         return histogram;
@@ -80,6 +79,8 @@ public class PastryClient {
             DatagramPacket reply = new DatagramPacket(buffer, buffer.length);
             aSocket.receive(reply);
             serverReply = new String(reply.getData()).trim();
+        }catch(SocketTimeoutException e){
+            return "TIMEOUT";
         }catch(SocketException e){
             return e.getMessage();
             //System.out.println("Socket: " + e.getMessage());
